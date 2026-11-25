@@ -21,6 +21,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace thesmos::procedures {
 
@@ -45,20 +46,29 @@ struct Count {
   Rational share() const { return counted == 0 ? Rational(0) : favour / Rational(counted); }
 };
 
-// The weight in favour among `votes` (party -> in favour) under a unit of count.
-inline Count count(const Parties& ps, const std::map<std::string, bool>& votes, Unit unit) {
+// A ballot: who cast it, the party that answers for it (the root of the voter's mandate, or the voter), and its sense. By origin,
+// a ballot counts for the origin of the party that answers for it, so that an envoy who votes under a community's mandate votes
+// for the community.
+struct Ballot {
+  std::string voter, bearer;
+  bool yes = false;
+};
+
+// The weight in favour among ballots under a unit of count.
+inline Count count(const Parties& ps, const std::vector<Ballot>& ballots, Unit unit) {
   Count c;
   if (unit == Unit::operative) {
-    for (const auto& [voter, yes] : votes) {
+    for (const Ballot& b : ballots) {
       c.counted++;
-      if (yes) c.favour = c.favour + Rational(1);
+      if (b.yes) c.favour = c.favour + Rational(1);
       else c.against++;
     }
     return c;
   }
   std::map<std::string, std::pair<long long, long long>> groups;  // origin -> (in favour, voters)
-  for (const auto& [voter, yes] : votes) {
-    const std::string o = kernel::origin(ps, voter);
+  for (const Ballot& b : ballots) {
+    const bool yes = b.yes;
+    const std::string o = kernel::origin(ps, b.bearer.empty() ? b.voter : b.bearer);
     const Kind k = ps.at(o).kind;
     if (unit == Unit::person && k != Kind::person) continue;
     if (unit == Unit::community && k != Kind::community) continue;
@@ -72,6 +82,13 @@ inline Count count(const Parties& ps, const std::map<std::string, bool>& votes, 
     if (g.first < g.second) c.against++;
   }
   return c;
+}
+
+// The same, for votes cast in each voter's own name (party -> in favour).
+inline Count count(const Parties& ps, const std::map<std::string, bool>& votes, Unit unit) {
+  std::vector<Ballot> ballots;
+  for (const auto& [voter, yes] : votes) ballots.push_back({voter, voter, yes});
+  return count(ps, ballots, unit);
 }
 
 inline Rational share(const Parties& ps, const std::map<std::string, bool>& votes, Unit unit) { return count(ps, votes, unit).share(); }

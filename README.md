@@ -26,8 +26,8 @@ The theory note is [docs/theory.md](docs/theory.md).
 | [constitutions](constitutions/README.md) | draft | the written form, admission, recognised against executable powers |
 | [chronicle](chronicle/README.md) | draft | the fold, seals, replay, the relational digest; the schema of the ground |
 | [norms](norms/README.md) | draft | the four facets of a norm and their marks |
-| institutional grammar | planned | institutional statements read by morphe's BNF |
-| crossings | planned | acts sent between chronicles, with receipts on both sides |
+| [statements](statements/README.md) | draft | rules written in words read by a grammar in BNF, a constitution's rules as statements, duties and prohibitions measured over a chronicle |
+| [crossings](crossings/README.md) | draft | acts sent between chronicles with receipts, heads witnessed by notaries, exit with the record |
 
 ## 3. Building and Checking
 

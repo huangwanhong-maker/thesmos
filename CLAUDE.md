@@ -16,13 +16,15 @@ thesmos (θεσμός, what is laid down, an institution) is institutions comput
 - constitutions as data in Ostrom's seven kinds of rules, read exactly and admitted by nine conditions of form;
 - the chronicle: a community's acts sealed in archeion's journal, the fold that gives its relational state, replay;
 - the four facets of a norm (regularity, adoption, operation, justification);
-- later: the institutional grammar read by morphe's BNF; acts that cross between chronicles with receipts; entrenchment by level.
+- crossings: acts that pass between chronicles with receipts, heads witnessed by notaries, exit with the record (decision 0004);
+- institutional statements: rules in words read by a grammar in BNF on morphe, a constitution's rules as statements, measured as norms (decision 0005);
+- later: constitutive statements; entrenchment by level; signatures.
 
 It builds on these sibling libraries:
 
 - **archeion**, for the sealed journal;
 - **symploke**, for JSON read exactly;
-- **morphe**, for exact rationals (later its grammars and flows);
+- **morphe**, for exact rationals and the BNF reader of statements (later its flows);
 - **apodeixis**, for verdicts;
 - **calx**, for the report of its checks;
 - **kategoria**, in the checks of the schema of the ground.
@@ -58,7 +60,7 @@ thesmos shares its governing principle with its sibling repositories: **modular,
 ```
 thesmos/
 ├── CMakeLists.txt   one header-only target thesmos::<module> per module (thesmos_module); the siblings added once
-├── kernel/ · mandates/ · acts/ · commitments/ · procedures/ · constitutions/ · chronicle/ · norms/
+├── kernel/ · mandates/ · acts/ · commitments/ · procedures/ · constitutions/ · chronicle/ · norms/ · crossings/ · statements/
 ├── schema/          the schema of the ground stated as categories (ground.cat), checked by kategoria
 ├── examples/        an illustrative constitution (workshop.json), invented
 ├── docs/            the theory note
@@ -88,4 +90,4 @@ C++20, header-only targets `thesmos::<module>`, CMake 3.20 or later, checks on c
 
 ## 8. Current State
 
-As of 2026-11-25, eight modules are written and checked ([decision 0003](development/decisions/0003-the-first-modules.md)), with the schema of the ground answered by kategoria. Its repository is the user's to create.
+As of 2026-11-25, eight modules are written and checked ([decision 0003](development/decisions/0003-the-first-modules.md)), with the schema of the ground answered by kategoria. On 2026-11-26 `crossings` was added, votes are counted for the party that answers for them and a party to a claim is recused ([decision 0004](development/decisions/0004-crossings-and-votes-borne.md)); then `statements` ([decision 0005](development/decisions/0005-institutional-statements.md)); 86 checks. The repository is published at `https://github.com/huangwanhong-maker/thesmos`.

@@ -56,7 +56,17 @@ struct Proposal {
   long long opened = 0;
   std::map<std::string, std::string> change;
   std::map<std::string, bool> votes;
+  std::map<std::string, std::string> bearers;  // voter -> the party that answers for its vote
   std::string status = "open";
+
+  std::vector<procedures::Ballot> ballots() const {
+    std::vector<procedures::Ballot> out;
+    for (const auto& [voter, yes] : votes) {
+      const auto b = bearers.find(voter);
+      out.push_back({voter, b == bearers.end() ? voter : b->second, yes});
+    }
+    return out;
+  }
 };
 struct Assessment {
   std::string by, bearer, object, criterion, value;
@@ -145,7 +155,7 @@ inline std::string decidable(const State& s, const Proposal& p, long long turn) 
   const auto unit = procedures::unit_named(d->second.count_by);
   if (!unit) return "the decision " + p.decision + " declares no unit of count";
   if (!procedures::known_rule(d->second.rule)) return "the rule " + d->second.rule + " is not one the kernel knows";
-  if (!procedures::passes(procedures::count(s.parties, p.votes, *unit), d->second.rule)) return "the proposal has not passed under the rule in force";
+  if (!procedures::passes(procedures::count(s.parties, p.ballots(), *unit), d->second.rule)) return "the proposal has not passed under the rule in force";
   if (turn < p.opened + constitutions::wait(s.rules, d->second.tempo)) return "the proposal is not ripe: its tempo is " + d->second.tempo;
   return {};
 }
@@ -182,6 +192,11 @@ inline std::string change_rules(Constitution& c, const std::map<std::string, std
   }
   if (!get("receiving").empty()) {
     c.receiving_per_round = std::stoll(get("receiving"));
+    applied = true;
+  }
+  if (!get("compact").empty()) {  // ratification of a compact among communities
+    if (std::find(c.compacts.begin(), c.compacts.end(), get("compact")) != c.compacts.end()) return "the compact is ratified already";
+    c.compacts.push_back(get("compact"));
     applied = true;
   }
   return applied ? std::string() : "the change names nothing the kernel can apply";
@@ -358,6 +373,13 @@ inline std::string effect(State& s, const Act& a, const std::string& who, bool a
     const auto it = s.claims.find(a.field("id"));
     if (it == s.claims.end()) return "there is no such claim";
     if (rules.claims.route.empty() || (!s.member(a.author, rules.claims.route) && !s.member(who, rules.claims.route))) return "the author is not on the route of claims";
+    // A body recuses any member who is a party to the claim, or answers for the party it is against (the design record, Section 8.3).
+    for (const std::string& p : {a.author, who}) {
+      const std::string& claimant = it->second.claimant;
+      const std::string& against = it->second.against;
+      if (p == claimant || p == against || (s.parties.has(p) && s.parties.has(against) && kernel::origin(s.parties, p) == kernel::origin(s.parties, against)))
+        return "a party to the claim may not answer it";
+    }
     if (apply) it->second.status = "answered", it->second.finding = a.field("finding");
     return {};
   }
@@ -402,7 +424,10 @@ inline std::string effect(State& s, const Act& a, const std::string& who, bool a
     if (it == s.proposals.end() || it->second.status != "open") return "there is no open proposal";
     const auto d = rules.aggregation.find(it->second.decision);
     if (d == rules.aggregation.end() || (!s.member(a.author, d->second.body) && !s.member(who, d->second.body))) return "the author is not a member of the body that decides";
-    if (apply) it->second.votes[a.author] = a.field("value") == "yes";
+    if (apply) {
+      it->second.votes[a.author] = a.field("value") == "yes";
+      it->second.bearers[a.author] = who;
+    }
     return {};
   }
   if (kind == "amend") {
@@ -479,7 +504,7 @@ inline std::string relational_digest(const State& s) {
   for (const auto& [id, p] : s.proposals) {
     std::string v = id + "\x1e" + p.decision + "\x1e" + std::to_string(p.opened) + "\x1e" + p.status;
     for (const auto& [k, x] : p.change) v += "\x1e" + k + "=" + x;
-    for (const auto& [voter, yes] : p.votes) v += "\x1e" + voter + (yes ? "+" : "-");
+    for (const auto& b : p.ballots()) v += "\x1e" + b.voter + "@" + b.bearer + (b.yes ? "+" : "-");
     put(t, "proposal", v);
   }
   for (const auto& x : s.assessments) put(t, "assessment", x.by + "\x1e" + x.bearer + "\x1e" + x.object + "\x1e" + x.criterion + "\x1e" + x.value);

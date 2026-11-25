@@ -18,8 +18,8 @@
     {"who": "anyone", "may": ["say", "acknowledge", "claim"]},
     {"who": "contributor", "may": ["offer", "commit", "deliver", "hand over", "report", "propose", "vote"], "in": ["tasks", "assembly"]},
     {"who": "member", "may": ["propose", "vote"], "in": ["assembly"]},
-    {"who": "reviewer", "may": ["assess", "propose", "vote"], "in": ["review", "assembly"]},
-    {"who": "steward", "may": ["admit", "request", "take", "accept", "release", "grant", "convert", "propose", "vote", "amend", "assess", "deploy"]},
+    {"who": "reviewer", "may": ["assess", "propose", "vote", "attest"], "in": ["review", "assembly"]},
+    {"who": "steward", "may": ["admit", "request", "take", "accept", "release", "grant", "convert", "propose", "vote", "amend", "assess", "report", "attest", "deploy"]},
     {"who": "steward", "must": ["answer"], "when": "a claim is admitted", "within": "one round"}
   ],
   "bodies": {

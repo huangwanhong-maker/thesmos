@@ -78,3 +78,5 @@ thesmos_module(constitutions LIBRARIES thesmos::kernel symploke::jsonld)
 thesmos_module(chronicle LIBRARIES thesmos::acts thesmos::commitments thesmos::constitutions thesmos::procedures archeion::fixity
                CHECK_LIBRARIES kategoria::script)
 thesmos_module(norms LIBRARIES thesmos::acts morphe::arithmetic)
+thesmos_module(crossings LIBRARIES thesmos::chronicle archeion::fixity)
+thesmos_module(statements LIBRARIES thesmos::norms thesmos::constitutions morphe::formal CHECK_LIBRARIES thesmos::chronicle)

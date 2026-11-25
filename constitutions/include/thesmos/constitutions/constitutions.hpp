@@ -43,6 +43,7 @@ struct Boundary {
 struct Choice {
   std::string who = "anyone";
   std::vector<std::string> may, must, must_never, in;
+  std::string when, within, or_else;  // for a duty: what calls for it, its term, and what follows if it is not done
 };
 struct Body {
   std::vector<std::string> of;
@@ -103,6 +104,7 @@ struct Constitution {
   Amendment amendment;
   bool records_declared = false;
   std::vector<std::string> captured;
+  std::vector<std::string> compacts;  // the compacts the community has ratified (its external relations)
   // Turns that must pass between a proposal and the act that decides it, by tempo (declared as "tempi", else these).
   std::map<std::string, long long> tempi = {{"operative", 0}, {"deliberative", 1}, {"constitutional", 3}};
 };
@@ -182,6 +184,9 @@ inline Constitution read(std::string_view written) {
       rule.must = strings(r.get("must"));
       rule.must_never = strings(r.get("must never"));
       rule.in = strings(r.get("in"));
+      rule.when = text(r.get("when"));
+      rule.within = text(r.get("within"));
+      rule.or_else = text(r.get("or else"));
       c.choice.push_back(rule);
     }
   if (const Json* b = doc.get("bodies"); b && b->is_object())
@@ -256,6 +261,7 @@ inline Constitution read(std::string_view written) {
     c.records_declared = true;
     c.captured = strings(r->get("captured"));
   }
+  if (const Json* x = doc.get("external"); x && x->is_object()) c.compacts = strings(x->get("compacts"));
   if (const Json* t = doc.get("tempi"); t && t->is_object())
     for (const auto& [name, v] : t->members)
       if (v.is_number()) c.tempi[name] = static_cast<long long>(v.number);

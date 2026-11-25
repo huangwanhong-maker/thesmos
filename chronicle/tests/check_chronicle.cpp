@@ -94,7 +94,7 @@ std::vector<Act> worked_record() {
     r.push_back(m);
   }
   for (int i = 1; i <= 3; i++) r.push_back(act("lab-k/agent-" + std::to_string(i), "join", 9, {{"position", "contributor"}}, "m-lab-" + std::to_string(i)));
-  r.push_back(act("resident", "claim", 10, {{"id", "k1"}, {"against", "steward"}}, {}, "Entry 17 names my street wrongly; a notice went out on that basis."));
+  r.push_back(act("resident", "claim", 10, {{"id", "k1"}, {"against", "workshop"}}, {}, "Entry 17 names my street wrongly; a notice went out on that basis."));
   r.push_back(act("steward", "answer", 11, {{"id", "k1"}, {"finding", "entry 17 corrected; the notice withdrawn"}}));
   r.push_back(act("steward", "convert", 12, {{"rule", "one accepted"}, {"whom", "mei"}}));
   r.push_back(act("steward", "propose", 12,
@@ -154,6 +154,12 @@ int main() {
             st.commitments.at("c1").status == commitments::Status::discharged && st.commitments.at("c2").status == commitments::Status::released &&
                 st.commitments.at("c1").debtor == "mei" && st.commitments.at("c2").debtor == "mei");
   s.require("the outsider's claim is answered on the declared route", st.claims.at("k1").status == "answered");
+  {
+    State y = st;
+    chronicle::step(y, act("resident", "claim", 16, {{"id", "k2"}, {"against", "steward"}}, {}, "The steward refused my entry without a reason."));
+    const auto o = chronicle::step(y, act("steward", "answer", 16, {{"id", "k2"}, {"finding", "no fault"}}));
+    s.require("a steward against whom a claim is made may not answer it: the body recuses its member", !o.admitted && o.reason.find("party to the claim") != std::string::npos, o.reason);
+  }
   s.require("tokens charged along the chain are 1,950,000 of 2,000,000", st.used.at("m-mei-1").at("tokens") == 1950000);
   const std::map<std::string, bool> votes{{"steward", true}, {"reviewer-a", false}, {"reviewer-b", false}, {"lab-k/agent-1", true}, {"lab-k/agent-2", true}, {"lab-k/agent-3", true}};
   s.require("the same six votes give 2/3 by operative and 1/2 by origin",
