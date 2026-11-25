@@ -1,0 +1,199 @@
+# The schema of the ground, stated as categories and answered by kategoria (thesmos, decision 0003).
+#
+# Tables are objects, references arrows, the ground's rules of answerability equations. A record of a community is a functor
+# from this category to finite sets, every reference a total function: an act without an author, or a mandate without a root,
+# cannot be written at all, and a record that breaks a rule is found by the equation it breaks.
+#
+# A statement marked "expect fails" on the line above it is meant to fail, and says where; every other holds.
+# Verify and draw, from the repository root of the infrastructure:
+#   node applications/category-studio/tools/draw-schema.mjs foundations/thesmos/schema/ground.cat foundations/thesmos/schema/figures
+# and checked by the chronicle module's check_schema (kategoria's session, every statement as expected).
+
+# ---------------------------------------------------------------------------------------------------------------------
+# The record and its rules of answerability
+# ---------------------------------------------------------------------------------------------------------------------
+
+# A Mandated is an act made under a mandate, a Plain one an act made in the author's own name. A Mandate names its holder and
+# principal, the root of its chain, and the answerable party at that root (an Answerable is a person, an organisation or a
+# community: an operative is never one). A Commitment is made by an act. A Crossing is an act sent from one community's
+# chronicle and entered in another's.
+# title Ground: The record of a community
+category Ground {
+  author        : Act -> Party
+  bearer        : Act -> Party
+  in_chronicle  : Act -> Chronicle
+  kept_by       : Chronicle -> Community
+  as_party      : Answerable -> Party
+  community     : Community -> Party
+  holder        : Mandate -> Party
+  principal     : Mandate -> Party
+  root          : Mandate -> Mandate
+  answers       : Mandate -> Answerable
+  act           : Mandated -> Act
+  under         : Mandated -> Mandate
+  plain         : Plain -> Act
+  debtor        : Commitment -> Party
+  made_in       : Commitment -> Act
+  sent          : Crossing -> Act
+  entered       : Crossing -> Act
+  sender        : Crossing -> Community
+  receiver      : Crossing -> Community
+  # 1. A root is its own root.
+  root . root = root
+  # 2. The party that answers for a chain is its root's principal, and it is answerable.
+  as_party . answers = principal . root
+  # 3. A mandate and its root are answered for by the same party.
+  answers . root = answers
+  # 4. An act under a mandate is made by the mandate's holder.
+  holder . under = author . act
+  # 5. The party that answers for an act under a mandate is the principal at the root of its chain (G3).
+  bearer . act = principal . root . under
+  # 6. An act in the author's own name is answered for by its author.
+  bearer . plain = author . plain
+  # 7. The debtor of a commitment is the party that answers for the act that made it.
+  debtor = bearer . made_in
+  # 8. A crossing act is sent from the sender's chronicle and entered in the receiver's (double entry).
+  kept_by . in_chronicle . sent = sender
+  kept_by . in_chronicle . entered = receiver
+}
+
+# A small record, invented, after the worked record of the design: a commons founded by its steward; a sponsor lends an agent
+# under a mandate, and the agent delegates a narrower mandate to a helper; the agent offers, delivers and is accepted; the
+# commitment's debtor is the sponsor; the commons sends a notice to a neighbouring community, which enters it with its receipt.
+# title Sample: The worked record on the schema
+sets Sample : Ground {
+  Party = {steward, reviewer_a, mei, mei_agent, mei_helper, commons_party, neighbours_party}
+  Community = {commons, neighbours}
+  community : commons -> commons_party, neighbours -> neighbours_party
+  Answerable = {as_steward, as_reviewer_a, as_mei, as_commons, as_neighbours}
+  as_party : as_steward -> steward, as_reviewer_a -> reviewer_a, as_mei -> mei, as_commons -> commons_party, as_neighbours -> neighbours_party
+  Chronicle = {commons_chronicle, neighbours_chronicle}
+  kept_by : commons_chronicle -> commons, neighbours_chronicle -> neighbours
+  Mandate = {m1, m2}
+  holder : m1 -> mei_agent, m2 -> mei_helper
+  principal : m1 -> mei, m2 -> mei_agent
+  root : m1 -> m1, m2 -> m1
+  answers : m1 -> as_mei, m2 -> as_mei
+  Act = {found, issue_m1, join, offer, take, deliver, assess, accept, issue_m2, report, notice, notice_received}
+  author : found -> steward, issue_m1 -> mei, join -> mei_agent, offer -> mei_agent, take -> steward, deliver -> mei_agent, assess -> reviewer_a, accept -> steward, issue_m2 -> mei_agent, report -> mei_helper, notice -> steward, notice_received -> neighbours_party
+  bearer : found -> steward, issue_m1 -> mei, join -> mei, offer -> mei, take -> steward, deliver -> mei, assess -> reviewer_a, accept -> steward, issue_m2 -> mei, report -> mei, notice -> steward, notice_received -> neighbours_party
+  in_chronicle : found -> commons_chronicle, issue_m1 -> commons_chronicle, join -> commons_chronicle, offer -> commons_chronicle, take -> commons_chronicle, deliver -> commons_chronicle, assess -> commons_chronicle, accept -> commons_chronicle, issue_m2 -> commons_chronicle, report -> commons_chronicle, notice -> commons_chronicle, notice_received -> neighbours_chronicle
+  Mandated = {u_join, u_offer, u_deliver, u_issue_m2, u_report}
+  act : u_join -> join, u_offer -> offer, u_deliver -> deliver, u_issue_m2 -> issue_m2, u_report -> report
+  under : u_join -> m1, u_offer -> m1, u_deliver -> m1, u_issue_m2 -> m1, u_report -> m2
+  Plain = {p_found, p_issue_m1, p_take, p_assess, p_accept, p_notice, p_received}
+  plain : p_found -> found, p_issue_m1 -> issue_m1, p_take -> take, p_assess -> assess, p_accept -> accept, p_notice -> notice, p_received -> notice_received
+  Commitment = {c1}
+  debtor : c1 -> mei
+  made_in : c1 -> offer
+  Crossing = {x1}
+  sent : x1 -> notice
+  entered : x1 -> notice_received
+  sender : x1 -> commons
+  receiver : x1 -> neighbours
+}
+
+# The commitment an agent makes is recorded as owed by the agent itself: refused, since the sponsor answers (rule 7).
+# expect fails
+sets AgentAsDebtor : Ground {
+  Party = {steward, mei, mei_agent, commons_party}
+  Community = {commons}
+  community : commons -> commons_party
+  Answerable = {as_mei, as_steward}
+  as_party : as_mei -> mei, as_steward -> steward
+  Chronicle = {chronicle}
+  kept_by : chronicle -> commons
+  Mandate = {m1}
+  holder : m1 -> mei_agent
+  principal : m1 -> mei
+  root : m1 -> m1
+  answers : m1 -> as_mei
+  Act = {offer}
+  author : offer -> mei_agent
+  bearer : offer -> mei
+  in_chronicle : offer -> chronicle
+  Mandated = {u_offer}
+  act : u_offer -> offer
+  under : u_offer -> m1
+  Plain = {}
+  Commitment = {c1}
+  debtor : c1 -> mei_agent
+  made_in : c1 -> offer
+  Crossing = {}
+}
+
+# A chain whose root principal is an operative: whichever answerable party the record names, it is not the root's principal
+# (rule 2).
+# expect fails
+sets OperativeRoot : Ground {
+  Party = {mei, rogue_agent, helper, commons_party}
+  Community = {commons}
+  community : commons -> commons_party
+  Answerable = {as_mei}
+  as_party : as_mei -> mei
+  Chronicle = {chronicle}
+  kept_by : chronicle -> commons
+  Mandate = {m1}
+  holder : m1 -> helper
+  principal : m1 -> rogue_agent
+  root : m1 -> m1
+  answers : m1 -> as_mei
+  Act = {}
+  Mandated = {}
+  Plain = {}
+  Commitment = {}
+  Crossing = {}
+}
+
+# An act recorded under a mandate that its author does not hold (rule 4).
+# expect fails
+sets BorrowedMandate : Ground {
+  Party = {mei, mei_agent, stray, commons_party}
+  Community = {commons}
+  community : commons -> commons_party
+  Answerable = {as_mei}
+  as_party : as_mei -> mei
+  Chronicle = {chronicle}
+  kept_by : chronicle -> commons
+  Mandate = {m1}
+  holder : m1 -> mei_agent
+  principal : m1 -> mei
+  root : m1 -> m1
+  answers : m1 -> as_mei
+  Act = {deliver}
+  author : deliver -> stray
+  bearer : deliver -> mei
+  in_chronicle : deliver -> chronicle
+  Mandated = {u}
+  act : u -> deliver
+  under : u -> m1
+  Plain = {}
+  Commitment = {}
+  Crossing = {}
+}
+
+# A crossing act entered only in the sender's own chronicle: the receiver holds no entry of it (rule 8).
+# expect fails
+sets OneSidedCrossing : Ground {
+  Party = {steward, commons_party, neighbours_party}
+  Community = {commons, neighbours}
+  community : commons -> commons_party, neighbours -> neighbours_party
+  Answerable = {as_steward}
+  as_party : as_steward -> steward
+  Chronicle = {commons_chronicle, neighbours_chronicle}
+  kept_by : commons_chronicle -> commons, neighbours_chronicle -> neighbours
+  Mandate = {}
+  Act = {notice}
+  author : notice -> steward
+  bearer : notice -> steward
+  in_chronicle : notice -> commons_chronicle
+  Mandated = {}
+  Plain = {p}
+  plain : p -> notice
+  Commitment = {}
+  Crossing = {x1}
+  sent : x1 -> notice
+  entered : x1 -> notice
+  sender : x1 -> commons
+  receiver : x1 -> neighbours
+}

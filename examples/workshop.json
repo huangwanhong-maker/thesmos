@@ -1,0 +1,62 @@
+{
+  "format": "noetarium.constitution/1",
+  "name": "workshop",
+  "purpose": "An invented commons that checks a catalogue against its sources; contributors, persons or operatives, vote with the stewards and reviewers, counted by origin.",
+  "positions": {
+    "steward": {"held by": ["person"]},
+    "reviewer": {"held by": ["person"]},
+    "contributor": {"held by": ["person", "organisation", "operative"]},
+    "member": {"held by": ["person", "organisation"]}
+  },
+  "boundary": {
+    "contributor": {"entry": "open", "exit": "free"},
+    "reviewer": {"entry": {"decided by": "admit"}, "exit": "free"},
+    "member": {"entry": {"decided by": "admit"}, "exit": "free"},
+    "steward": {"entry": {"decided by": "appoint steward"}, "exit": {"notice": "one round"}}
+  },
+  "choice": [
+    {"who": "anyone", "may": ["say", "acknowledge", "claim"]},
+    {"who": "contributor", "may": ["offer", "commit", "deliver", "hand over", "report", "propose", "vote"], "in": ["tasks", "assembly"]},
+    {"who": "member", "may": ["propose", "vote"], "in": ["assembly"]},
+    {"who": "reviewer", "may": ["assess", "propose", "vote"], "in": ["review", "assembly"]},
+    {"who": "steward", "may": ["admit", "request", "take", "accept", "release", "grant", "convert", "propose", "vote", "amend", "assess", "deploy"]},
+    {"who": "steward", "must": ["answer"], "when": "a claim is admitted", "within": "one round"}
+  ],
+  "bodies": {
+    "stewards": {"of": ["steward"]},
+    "assembly": {"of": ["steward", "reviewer", "contributor", "member"]}
+  },
+  "aggregation": {
+    "admit": {"body": "stewards", "rule": "any one", "count by": "person", "tempo": "operative"},
+    "answer claim": {"body": "stewards", "rule": "any one", "count by": "person", "tempo": "deliberative"},
+    "appoint steward": {"body": "assembly", "rule": "majority", "count by": "origin", "tempo": "deliberative"},
+    "amend operational": {"body": "assembly", "rule": "majority", "count by": "origin", "tempo": "deliberative"},
+    "amend constitutional": {"body": "assembly", "rule": "two thirds", "count by": "origin", "tempo": "constitutional"}
+  },
+  "scenes": {
+    "tasks": {"acts": ["request", "offer", "take", "deliver", "hand over", "accept", "release"], "read": "anyone", "write": ["contributor", "steward"], "presence": "mixed", "tempo": "operative"},
+    "review": {"acts": ["assess", "say"], "read": ["steward", "reviewer"], "write": ["steward", "reviewer"], "presence": "persons", "tempo": "deliberative"},
+    "assembly": {"acts": ["propose", "vote", "amend"], "read": "anyone", "write": ["steward", "reviewer", "contributor", "member"], "presence": "mixed", "tempo": "deliberative"},
+    "intake": {"acts": ["claim", "answer"], "read": ["steward"], "write": "anyone", "presence": "persons", "tempo": "deliberative"}
+  },
+  "payoff": {"returns": {"basis": "acknowledgement"}, "sanctions": ["note", "suspension"]},
+  "scope": {"governs": ["the work declared in its tasks"], "leaves": ["conditions of use set by a source"]},
+  "conversions": {},
+  "receiving": {"unit": "hours of review", "per round": 6},
+  "circulation": ["gift", "common provision"],
+  "claims": {"route": "stewards", "decided by": "answer claim", "outsiders": true, "review": "assembly"},
+  "custody": {
+    "powers": {"deploy": ["steward"]},
+    "keys": {"threshold": 1, "of": ["steward"]},
+    "reserve": []
+  },
+  "preserved": ["a contributor can raise a challenge to a criterion and reach a role that may revise it"],
+  "amendment": {
+    "operational": "amend operational",
+    "collective choice": "amend constitutional",
+    "constitutional": "amend constitutional",
+    "entrenched": ["claims", "exit with the record"]
+  },
+  "records": {"captured": ["acts of force"], "talk": "by the scene's rule", "retention": "five years"},
+  "external": {"card": true, "envoys": [], "compacts": []}
+}
