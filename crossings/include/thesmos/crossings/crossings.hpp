@@ -12,15 +12,30 @@
 //     the earlier tree to be the beginning of the later; a community that rewrote an entry it had shown cannot give one.
 //   - A party leaving takes the acts that concern it, each with its proof of inclusion under a witnessed head, and can show any of
 //     them to anyone who knows that head (invariant G7, exit with the record).
+//   - A passport (decision 0007) is the document noetarium.passport/1 that a home issues for a mandate it has entered: every link of
+//     the mandate's chain as the act that issued it, each with its seal and its proof of inclusion under the home's head; the notaries'
+//     witnesses of that head, each an attestation in the notary's own chronicle with its proof under the notary's head; and the
+//     holder's declarations (its kind and, for an operative, its controller, provider and model). Anyone who knows the home's head, or
+//     the head of a notary that witnessed it, verifies the passport from the document alone: every link is an act of the home, the
+//     chain stands, its term holds at the instant of the check, it names the host where it is shown, and the credential shown is the
+//     one whose digest the mandate names (Proposition 11 of the theory note). A passport grants no entry; entry is the host's.
+//     Since decision 0009 the document, its verification and its written form are the module passports, beneath the chronicle, so
+//     that a host's fold verifies a passport presented to it by the act `present`; this module issues passports and witnesses heads,
+//     which need a chronicle's state, and names the document's types as its own.
 
 #pragma once
 
 #include <thesmos/chronicle/chronicle.hpp>
+#include <thesmos/passports/passports.hpp>
 
 #include <archeion/fixity/journal.hpp>
 #include <archeion/fixity/sha256.hpp>
 
+#include <symploke/jsonld/json.hpp>
+
+#include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace thesmos::crossings {
@@ -28,6 +43,23 @@ namespace thesmos::crossings {
 using archeion::fixity::Digest;
 using archeion::fixity::Inclusion;
 using chronicle::State;
+
+// The passport as a document, its witnesses and its verification are thesmos::passports's (beneath the chronicle, decision 0009),
+// named here as they were.
+using passports::Declarations;
+using passports::Head;
+using passports::Link;
+using passports::Passport;
+using passports::Presentation;
+using passports::Reading;
+using passports::Trust;
+using passports::Witness;
+using passports::attestation;
+using passports::attests;
+using passports::read_passport;
+using passports::same;
+using passports::verify;
+using passports::write;
 
 // ---- Trees and heads ----------------------------------------------------------------------------------------------------------
 
@@ -40,11 +72,6 @@ inline std::vector<std::string> leaves(const archeion::fixity::Journal& j) {
   return out;
 }
 
-struct Head {
-  std::string community;
-  std::size_t size = 0;
-  Digest root{};
-};
 
 inline Head head(const std::string& community, const State& s) { return {community, s.journal.entries.size(), archeion::fixity::merkle_root(leaves(s.journal))}; }
 
@@ -160,4 +187,70 @@ inline apodeixis::kernel::Verdict verify(const Portion& p, const Head& known) {
   return Verdict::yes(claim, "every act it took is under the head", p.items.size());
 }
 
+// ---- Passports issued and heads witnessed (decision 0007) ---------------------------------------------------------------------------
+
+// A notary's witness given in its own chronicle, with what its rules said.
+struct Witnessed {
+  bool admitted = false;
+  std::string reason;
+  Witness witness;
+};
+
+// A notary witnesses a head: its party `attester` enters the attestation in the notary's chronicle, under the notary's own rules, and
+// the witness is returned with its proof; or the reason those rules refuse it.
+inline Witnessed witness(State& notary, const std::string& notary_id, const std::string& attester, long long turn, const Head& h, const std::string& when = {},
+                         const std::string& mandate = {}) {
+  const auto o = chronicle::step(notary, attestation(h, attester, turn, when, mandate));
+  if (!o.admitted) return {false, o.reason, {}};
+  Witness w;
+  w.notary = notary_id, w.attester = attester, w.mandate = mandate, w.turn = turn, w.when = when;
+  w.seal = notary.journal.entries.back().seal;
+  w.proof = archeion::fixity::prove(leaves(notary.journal), notary.journal.entries.size() - 1);
+  w.at = head(notary_id, notary);
+  return {true, "admitted", w};
+}
+
+// Whether a witness attests the head `h`: its attestation of exactly that head stands under the notary's head it names.
+struct Issued {
+  bool admitted = false;
+  std::string reason;
+  Passport passport;
+};
+
+
+// The passport of the mandate `id` as the home `home` stands: the acts that issued every link of its chain, each with its seal and
+// its proof under the home's present head, and the holder's declarations. Refused when the mandate does not stand at its home (a link
+// widens, is revoked, or answers to nobody), names no credential, has ended its term in instants at `at`, or is held by an operative
+// whose declared controller issued no link of its chain. Witnesses are added as notaries give them.
+inline Issued issue(const std::string& home, const State& s, const std::string& id, const std::string& at = {}, const Declarations& d = {}) {
+  const auto refuse = [](std::string why) { return Issued{false, std::move(why), {}}; };
+  if (!s.mandates.count(id)) return refuse("the home has issued no mandate " + id);
+  if (const auto f = mandates::faults(s.parties, s.mandates, id, s.revoked); !f.empty()) return refuse("the mandate does not stand at its home: " + f.front());
+  const mandates::Mandate& m = s.mandates.at(id);
+  if (m.credential.empty()) return refuse("a passport names its holder's credential by digest, and the mandate " + id + " names none");
+  if (!at.empty() && !mandates::is_instant(at)) return refuse("a passport is issued at an instant, ISO 8601 in UTC (YYYY-MM-DDTHH:MM:SSZ)");
+  if (!at.empty() && !m.until.empty() && m.until < at) return refuse("the mandate's term in instants ended at " + m.until);
+  const auto links = mandates::chain(s.mandates, id);
+  const kernel::Party& holder = s.parties.at(m.holder);
+  if (holder.kind == kernel::Kind::operative && !passports::detail::controller_in_chain(holder.controller, links))
+    return refuse(holder.controller.empty() ? "an operative's passport names its controller, and the home declares none for " + m.holder
+                                            : "the controller the home declares for " + m.holder + ", " + holder.controller + ", issued no link of its chain");
+  Passport p;
+  p.issued = at, p.home = home, p.node = d.node, p.status_at = d.status_at, p.model = d.model, p.label = d.label;
+  p.principal = s.parties.at(links.front()->principal);
+  p.holder = holder;
+  const auto data = leaves(s.journal);
+  for (const mandates::Mandate* link : links) {
+    std::size_t k = 0;
+    while (k < s.acts.size() && !(s.acts[k].kind == "mandate" && s.acts[k].grant && s.acts[k].grant->id == link->id)) k++;
+    if (k == s.acts.size()) return refuse("the act that issued " + link->id + " is not in the home's chronicle");
+    acts::Act a = s.acts[k];
+    a.body.clear();
+    p.chain.push_back(Link{std::move(a), s.journal.entries[k].seal, archeion::fixity::prove(data, k)});
+  }
+  p.head = head(home, s);
+  return {true, "issued", p};
+}
+
+// What a verifier knows: the heads of homes it knows itself, and the heads of notaries whose witness it accepts.
 }  // namespace thesmos::crossings

@@ -56,6 +56,23 @@ class Parties {
     by_id_[id] = std::move(p);
   }
   bool has(const std::string& id) const { return by_id_.count(id) > 0; }
+  // Declares a party by an act (decision 0009): it is added when unknown, accepted unchanged when known with the same kind, controller
+  // and provider, and refused when known otherwise, so that a party is declared once and its controller with it. Returns the reason
+  // of a refusal, or nothing.
+  std::string declare(const Party& p) {
+    if (p.id.empty()) return "a party declared has an identifier";
+    const auto it = by_id_.find(p.id);
+    if (it == by_id_.end()) {
+      by_id_[p.id] = p;
+      return {};
+    }
+    const Party& q = it->second;
+    if (q.kind != p.kind) return "the party " + p.id + " is known here as " + std::string(word(q.kind)) + ", not as " + std::string(word(p.kind));
+    if (q.controller != p.controller) return "the party " + p.id + " is known here with another controller, " + (q.controller.empty() ? std::string("none") : q.controller);
+    if (q.provider != p.provider) return "the party " + p.id + " is known here with another provider, " + (q.provider.empty() ? std::string("none") : q.provider);
+    return {};
+  }
+  void erase(const std::string& id) { by_id_.erase(id); }
   const Party& at(const std::string& id) const {
     const auto it = by_id_.find(id);
     if (it == by_id_.end()) throw std::out_of_range("thesmos::kernel: the party " + id + " is unknown");

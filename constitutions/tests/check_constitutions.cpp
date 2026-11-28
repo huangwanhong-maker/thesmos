@@ -63,6 +63,27 @@ int main() {
   reserve.custody.reserve.push_back(Reserve{"contributor", "the founder's first deployment", "three rounds", {"deploy"}});
   s.require("and is admitted once declared as a reserve with its scope and term", admission(reserve).empty(), first(admission(reserve)));
 
+  // Holdings and the norms of access (decision 0006): their form is held within closure (1) and the custody of means (6).
+  Constitution held = c, kept = c;
+  held.holdings.norms[0].object.value = "attic";
+  kept.holdings.holdings.at("guide").custodian = "librarian";
+  bool closure = false, custody = false;
+  for (const Fault& f : admission(held)) closure = closure || (f.condition == 1 && f.reason.find("attic") != std::string::npos);
+  for (const Fault& f : admission(kept)) custody = custody || (f.condition == 6 && f.reason.find("librarian") != std::string::npos);
+  s.require("a norm of access naming an undeclared holding is a fault of closure, and a holding kept by no office a fault of the custody of means", closure && custody);
+
+  // The visibility of the parts of a constitution, declared by its policy of records.
+  Constitution hidden = c, ghost = c;
+  hidden.visibility["claims"] = thesmos::holdings::Visibility::members();
+  ghost.visibility["custody"] = thesmos::holdings::Visibility{thesmos::holdings::Visibility::Level::offices, {"treasurer"}};
+  bool kept_from_claimants = false, unknown_office = false;
+  for (const Fault& f : admission(hidden)) kept_from_claimants = kept_from_claimants || (f.condition == 4 && f.reason.find("public") != std::string::npos);
+  for (const Fault& f : admission(ghost)) unknown_office = unknown_office || (f.condition == 1 && f.reason.find("treasurer") != std::string::npos);
+  s.require("the workshop keeps its custody of means to its steward and its holders to its members, the rest public; a route for claims kept from the public, "
+            "and a part shown to an undeclared office, are refused",
+            shown(c, "custody").offices == std::set<std::string>{"steward"} && shown(c, "holders").level == thesmos::holdings::Visibility::Level::members &&
+                shown(c, "choice").level == thesmos::holdings::Visibility::Level::everyone && kept_from_claimants && unknown_office);
+
   bool refused = false;
   try {
     read("{\"positions\": {\"steward\": [}\n}");

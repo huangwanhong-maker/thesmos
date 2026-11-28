@@ -57,6 +57,31 @@
     "constitutional": "amend constitutional",
     "entrenched": ["claims", "exit with the record"]
   },
-  "records": {"captured": ["acts of force"], "talk": "by the scene's rule", "retention": "five years"},
-  "external": {"card": true, "envoys": [], "compacts": []}
+  "records": {"captured": ["acts of force"], "talk": "by the scene's rule", "retention": "five years", "visibility": {"custody": {"office": ["steward"]}, "holders": "members"}},
+  "external": {"card": true, "envoys": [], "compacts": []},
+  "holdings": {
+    "sources": {"kind": "data", "custodian": "steward", "review": "another origin", "visibility": "public", "provenance": {"source": "the workshop's founding", "licence": "CC BY 4.0"}},
+    "catalogue": {"kind": "document", "custodian": "steward", "visibility": "public", "provenance": {"digest": "da8576f17750fce3999ab0a09acb216fe8b6e8a3ea58acc483f74344deb46773", "source": "the workshop catalogue, first edition", "licence": "CC BY 4.0"}},
+    "review hours": {"kind": "capacity", "unit": "hours", "quantity": 40, "custodian": "steward"},
+    "tokens": {"kind": "budget", "unit": "tokens", "quantity": 200000, "custodian": "steward"},
+    "relief": {"kind": "budget", "unit": "hours", "quantity": 10, "custodian": "steward"},
+    "guide": {"kind": "knowledge", "custodian": "steward", "visibility": "public", "provenance": {"source": "an invented guide to the workshop", "licence": "CC BY 4.0"}},
+    "accounts": {"kind": "reference", "custodian": "steward", "visibility": {"office": "steward"}, "provenance": {"source": "the workshop's account, kept elsewhere"}}
+  },
+  "access": {
+    "open": {"knowledge": ["consult"]},
+    "norms": [
+      {"id": "sources consulted", "who": "any position", "may": "consult", "object": "sources", "transmit": "any"},
+      {"id": "sources deposited", "who": "contributor", "may": "deposit", "object": "sources"},
+      {"id": "sources withdrawn", "who": {"role": "custodian"}, "may": "withdraw", "object": "sources"},
+      {"id": "a source corrected", "who": {"role": "depositor"}, "may": "modify", "object": "sources"},
+      {"id": "catalogue consulted", "who": "anyone", "may": "consult", "object": "catalogue"},
+      {"id": "catalogue revised", "who": "steward", "may": "modify", "object": "catalogue"},
+      {"id": "review hours used", "who": "reviewer", "may": "use", "object": "review hours", "quota": 6, "for": ["review"], "or else": "the hours are not given"},
+      {"id": "review hours lent", "who": {"role": "custodian"}, "may": "lend", "object": "review hours"},
+      {"id": "tokens drawn by agents", "who": {"kind": "operative"}, "may": "use", "object": "tokens", "quota": 50000, "under mandate": {"kinds": ["use"], "matters": ["catalogue"]}},
+      {"id": "relief by need", "who": "any position", "may": "use", "object": "relief", "quota": 2, "need": "pressing need"},
+      {"id": "catalogue kept current", "who": "steward", "must": "modify", "object": "catalogue", "or else": "the catalogue falls behind its sources"}
+    ]
+  }
 }

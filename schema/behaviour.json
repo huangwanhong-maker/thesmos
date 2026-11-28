@@ -1,0 +1,90 @@
+{
+  "format": "noetarium.behaviour/1",
+  "name": "base",
+  "version": 1,
+  "classes": ["juristic, unilateral", "juristic, bilateral", "juristic, collective", "juristic, constitutive", "quasi-juristic", "evidence", "expressive"],
+  "effects": [
+    {"effect": "position", "changes": "positions: enter, leave", "by law": ["end position"]},
+    {"effect": "mandate", "changes": "mandates: issue, revoke", "by law": []},
+    {"effect": "commitment", "changes": "commitments: create, move", "by law": ["lapse", "overdue"]},
+    {"effect": "grant", "changes": "grants, and allowances charged along chains", "by law": []},
+    {"effect": "holding", "changes": "holdings and their accesses; the check of a deposit", "by law": ["loan returns"]},
+    {"effect": "claim", "changes": "claims: open, answer", "by law": []},
+    {"effect": "assessment", "changes": "assessments: record", "by law": []},
+    {"effect": "proposal", "changes": "proposals and the rules in force: ballots, adoption, a change applied", "by law": []},
+    {"effect": "evidence", "changes": "nothing beyond the seal", "by law": []},
+    {"effect": "party", "changes": "known parties with their control and provision: declare", "by law": []},
+    {"effect": "recognition", "changes": "recognitions of other communities: set", "by law": []}
+  ],
+  "primitives": [
+    {"kind": "say", "class": "expressive", "force": "expressive", "effects": ["evidence"], "reads": []},
+    {"kind": "acknowledge", "class": "expressive", "force": "expressive", "effects": ["evidence"], "reads": []},
+    {"kind": "report", "class": "evidence", "force": "assertive", "effects": ["evidence", "mandate"], "reads": ["matter", "head of", "size", "root", "mandate status", "status"]},
+    {"kind": "deliver", "class": "quasi-juristic", "force": "assertive", "effects": ["commitment"], "reads": ["id", "artefact"]},
+    {"kind": "assess", "class": "evidence", "force": "assertive", "effects": ["assessment"], "reads": ["object", "criterion", "value"]},
+    {"kind": "attest", "class": "evidence", "force": "assertive", "effects": ["holding", "evidence"], "reads": ["holding", "crossing", "digest", "from"]},
+    {"kind": "hand over", "class": "quasi-juristic", "force": "assertive", "effects": ["commitment"], "reads": ["id", "artefact"]},
+    {"kind": "request", "class": "quasi-juristic", "force": "directive", "effects": ["evidence"], "reads": []},
+    {"kind": "claim", "class": "quasi-juristic", "force": "directive", "effects": ["claim"], "reads": ["id", "against"]},
+    {"kind": "propose", "class": "juristic, collective", "force": "directive", "effects": ["proposal"], "reads": ["id", "decision", "level", "change"]},
+    {"kind": "offer", "class": "juristic, unilateral", "force": "commissive", "effects": ["commitment"], "reads": ["id", "to", "matter", "unit", "amount", "due"]},
+    {"kind": "take", "class": "juristic, bilateral", "force": "commissive", "effects": ["commitment"], "reads": ["id"]},
+    {"kind": "commit", "class": "juristic, unilateral", "force": "commissive", "effects": ["commitment"], "reads": ["id", "to", "matter", "unit", "amount", "due"]},
+    {"kind": "grant", "class": "juristic, unilateral", "force": "commissive", "effects": ["grant"], "reads": ["id", "to", "resource", "ceiling"]},
+    {"kind": "found", "class": "juristic, constitutive", "force": "declarative", "effects": ["position", "holding", "party"], "reads": ["community", "parties"]},
+    {"kind": "join", "class": "juristic, unilateral", "force": "declarative", "effects": ["position"], "reads": ["position", "sponsor"]},
+    {"kind": "admit", "class": "juristic, unilateral", "force": "declarative", "effects": ["position", "proposal"], "reads": ["position", "whom", "proposal"]},
+    {"kind": "leave", "class": "juristic, unilateral", "force": "declarative", "effects": ["position"], "reads": ["position"]},
+    {"kind": "mandate", "class": "juristic, unilateral", "force": "declarative", "effects": ["mandate", "grant"], "reads": []},
+    {"kind": "revoke", "class": "juristic, unilateral", "force": "declarative", "effects": ["mandate"], "reads": ["which"]},
+    {"kind": "accept", "class": "juristic, unilateral", "force": "declarative", "effects": ["commitment"], "reads": ["id"]},
+    {"kind": "release", "class": "juristic, unilateral", "force": "declarative", "effects": ["commitment"], "reads": ["id"]},
+    {"kind": "cancel", "class": "juristic, unilateral", "force": "declarative", "effects": ["commitment"], "reads": ["id"]},
+    {"kind": "assign", "class": "juristic, unilateral", "force": "declarative", "effects": ["commitment"], "reads": ["id", "to"]},
+    {"kind": "use", "class": "juristic, unilateral", "force": "declarative", "effects": ["grant", "holding"], "reads": ["id", "amount", "holding", "purpose", "transmit"]},
+    {"kind": "answer", "class": "juristic, unilateral", "force": "declarative", "effects": ["claim"], "reads": ["id", "finding"]},
+    {"kind": "convert", "class": "juristic, unilateral", "force": "declarative", "effects": ["position"], "reads": ["rule", "whom"]},
+    {"kind": "vote", "class": "juristic, collective", "force": "declarative", "effects": ["proposal"], "reads": ["id", "value"]},
+    {"kind": "amend", "class": "juristic, collective", "force": "declarative", "effects": ["proposal"], "reads": ["id"]},
+    {"kind": "consult", "class": "juristic, unilateral", "force": "declarative", "effects": ["holding"], "reads": ["holding", "amount", "purpose", "transmit", "kind", "within", "digest", "source", "licence", "unit", "to", "until"]},
+    {"kind": "deposit", "class": "juristic, unilateral", "force": "declarative", "effects": ["holding"], "reads": ["holding", "amount", "purpose", "transmit", "kind", "within", "digest", "source", "licence", "unit", "to", "until"]},
+    {"kind": "modify", "class": "juristic, unilateral", "force": "declarative", "effects": ["holding"], "reads": ["holding", "amount", "purpose", "transmit", "kind", "within", "digest", "source", "licence", "unit", "to", "until"]},
+    {"kind": "lend", "class": "juristic, unilateral", "force": "declarative", "effects": ["holding"], "reads": ["holding", "amount", "purpose", "transmit", "kind", "within", "digest", "source", "licence", "unit", "to", "until"]},
+    {"kind": "withdraw", "class": "juristic, unilateral", "force": "declarative", "effects": ["holding"], "reads": ["holding", "amount", "purpose", "transmit", "kind", "within", "digest", "source", "licence", "unit", "to", "until"]},
+    {"kind": "present", "class": "quasi-juristic", "force": "assertive", "effects": ["party", "mandate"], "reads": ["passport"]},
+    {"kind": "recognise", "class": "juristic, unilateral", "force": "declarative", "effects": ["recognition"], "reads": ["of", "level", "matter"]}
+  ],
+  "kinds": [
+    {"kind": "notice", "force": "assertive", "counts as": "report", "fixed": {"type": "notice"}}
+  ],
+  "features": [
+    {"name": "operation", "space": "categorical", "vocabulary": ["run tool", "call model", "read", "write", "send", "compute", "wait", "message", "other"], "recorded by": "the node", "grade": "A"},
+    {"name": "tokens", "space": "real", "unit": "tokens", "scale": 100000, "recorded by": "the principal's ledger", "grade": "A"},
+    {"name": "runs", "space": "real", "unit": "runs", "scale": 10, "recorded by": "the node", "grade": "A"},
+    {"name": "seconds", "space": "real", "unit": "seconds", "scale": 3600, "recorded by": "the node", "grade": "A"},
+    {"name": "bytes", "space": "real", "unit": "bytes", "scale": 1000000, "recorded by": "the node", "grade": "A"},
+    {"name": "inputs", "space": "digests", "unit": "SHA-256", "recorded by": "the node", "grade": "A"},
+    {"name": "outputs", "space": "digests", "unit": "SHA-256", "recorded by": "the node", "grade": "A"},
+    {"name": "holdings touched", "space": "set", "recorded by": "the gateway", "grade": "A"},
+    {"name": "items touched", "space": "set", "recorded by": "the gateway", "grade": "A"},
+    {"name": "provider", "space": "categorical", "recorded by": "the passport", "grade": "A"},
+    {"name": "model", "space": "categorical", "recorded by": "the passport", "grade": "A"},
+    {"name": "community", "space": "categorical", "recorded by": "the gateway", "grade": "A"},
+    {"name": "node", "space": "categorical", "recorded by": "the gateway", "grade": "A"},
+    {"name": "words", "space": "real", "unit": "words", "scale": 1000, "recorded by": "analysis", "grade": "C"}
+  ],
+  "nearness": "sum",
+  "conduct": [
+    {"category": "bench run", "where": "operation is 'run tool' and holdings-touched contains 'bench'"},
+    {"category": "heavy model call", "where": "operation is 'call model' and tokens above 100000"},
+    {"category": "a reading", "where": "operation is 'read'"}
+  ],
+  "counts as": [],
+  "triggers": [
+    {"rule": "a loan returns at its term", "then": "loan returns", "by the ground": true},
+    {"rule": "a commitment past its due is overdue", "then": "overdue", "by the ground": true}
+  ],
+  "recognition": [
+    {"fact": "authorship", "grade at least": "B", "attested by": "another origin"}
+  ]
+}

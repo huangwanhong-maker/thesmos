@@ -1,7 +1,11 @@
 # thesmos: institutions computed with. Parties of declared kinds and their origins; mandates whose chains only narrow, with
 # envelopes charged along the chain; acts of declared force with a typed envelope and a free body; commitments and their
 # life, set-off and novation; constitutions as data in Ostrom's seven kinds of rules, admitted by form; decision rules with
-# their unit of count; the chronicle, a sealed record whose fold gives the relational state; the facets of a norm.
+# their unit of count; the chronicle, a sealed record whose fold gives the relational state; the facets of a norm; a community's
+# holdings and the norms of access to them, and the briefing a party reads from the record; passports issued by a home and verified
+# anywhere from the document (decision 0007); a taxonomy of behaviour, its declared forms of extension and the behaviour journal
+# joined to the chronicle (decision 0008), the taxonomy admitted and revised on kategoria's ontologies; presentation and recognition
+# (decision 0009); the taxonomy in levels, disclosure agreements and epistemic behaviour recorded by agreement (decision 0010); items, routes and rulings (decision 0011); posted work (decision 0012); transmission by operatives, counts by provider and by weight, and compacts with reservations and withdrawal (decision 0013).
 #
 # Every module is a header-only target thesmos::<module>. thesmos uses archeion (the sealed journal), symploke (JSON, read
 # exactly), morphe (exact rationals), apodeixis (verdicts), calx (the report of its checks), and kategoria in its checks (the
@@ -72,10 +76,17 @@ endfunction()
 thesmos_module(kernel LIBRARIES apodeixis::kernel)
 thesmos_module(mandates LIBRARIES thesmos::kernel)
 thesmos_module(acts LIBRARIES thesmos::mandates)
+thesmos_module(behaviour LIBRARIES thesmos::acts archeion::fixity symploke::jsonld morphe::formal kategoria::ontologies  # decision 0008
+               CHECK_LIBRARIES thesmos::chronicle)
 thesmos_module(commitments LIBRARIES thesmos::kernel)
 thesmos_module(procedures LIBRARIES thesmos::kernel morphe::arithmetic)
-thesmos_module(constitutions LIBRARIES thesmos::kernel symploke::jsonld)
-thesmos_module(chronicle LIBRARIES thesmos::acts thesmos::commitments thesmos::constitutions thesmos::procedures archeion::fixity
+thesmos_module(holdings LIBRARIES thesmos::kernel archeion::fixity symploke::jsonld)  # decision 0006
+thesmos_module(work LIBRARIES symploke::jsonld)  # decision 0012
+thesmos_module(compacts LIBRARIES archeion::fixity symploke::jsonld)  # decision 0013
+thesmos_module(disclosure LIBRARIES thesmos::holdings archeion::fixity symploke::jsonld)  # decision 0010
+thesmos_module(passports LIBRARIES thesmos::acts thesmos::holdings archeion::fixity symploke::jsonld apodeixis::kernel)  # decisions 0007, 0009
+thesmos_module(constitutions LIBRARIES thesmos::kernel thesmos::holdings thesmos::behaviour thesmos::work thesmos::procedures thesmos::compacts symploke::jsonld)
+thesmos_module(chronicle LIBRARIES thesmos::acts thesmos::commitments thesmos::constitutions thesmos::procedures thesmos::passports thesmos::disclosure archeion::fixity
                CHECK_LIBRARIES kategoria::script)
 thesmos_module(norms LIBRARIES thesmos::acts morphe::arithmetic)
 thesmos_module(crossings LIBRARIES thesmos::chronicle archeion::fixity)

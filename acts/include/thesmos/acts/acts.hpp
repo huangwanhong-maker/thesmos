@@ -5,6 +5,10 @@
 // An act's consequences follow from its envelope alone: its author, kind, turn, mandate, typed fields, the mandate it issues,
 // the charges it makes and the first holders it names. Its body enters the seal and stays out of the fold, which is also the
 // defence against instructions carried inside messages (the design record of 2026-11-25, Definitions 5 and 6, idea 2).
+//
+// The mandate an act issues is written into its envelope part by part; the parts passports added (decision 0007: the communities in
+// which it may be used, its holder's credential by digest, a reservation, a term in instants) are written only when set, so that every
+// envelope written before them is written again exactly, and every seal stands.
 
 #pragma once
 
@@ -46,6 +50,13 @@ inline const std::map<std::string, Force>& ground() {
       {"accept", Force::declarative},    {"release", Force::declarative},   {"cancel", Force::declarative},
       {"assign", Force::declarative},    {"use", Force::declarative},       {"answer", Force::declarative},
       {"convert", Force::declarative},   {"vote", Force::declarative},      {"amend", Force::declarative},
+      // access to a community's holdings, each made by virtue of a norm of access (decision 0006); "use" serves grants and holdings
+      {"consult", Force::declarative},   {"deposit", Force::declarative},   {"modify", Force::declarative},
+      {"lend", Force::declarative},      {"withdraw", Force::declarative},
+      // a passport presented at a host, and a community's recognition of another in levels (decision 0009)
+      {"present", Force::assertive},     {"recognise", Force::declarative},
+      // a side's ratification of a disclosure agreement, and its denunciation (decision 0010)
+      {"agree", Force::commissive},      {"denounce", Force::declarative},
   };
   return table;
 }
@@ -124,6 +135,11 @@ inline std::string envelope(const Act& a) {
     put(g, "delegable", m.delegable ? "yes" : "no");
     put(g, "parent", m.parent);
     for (const auto& [r, n] : m.slice) put(g, "slice." + r, std::to_string(n));
+    // The parts passports add (decision 0007), written only when set, so that a mandate without them keeps its text and its seal.
+    if (!m.communities.empty()) put(g, "communities", detail::joined(m.communities));
+    if (!m.credential.empty()) put(g, "credential", m.credential);
+    if (m.reserves) put(g, "reserves", "yes");
+    if (!m.since.empty() || !m.until.empty()) put(g, "instants", m.since + "/" + m.until);
     put(s, "grant", g);
   }
   for (const Charge& c : a.charges) put(s, "charge", c.mandate + "\x1e" + c.resource + "\x1e" + std::to_string(c.amount));
